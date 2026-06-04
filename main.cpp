@@ -15,7 +15,6 @@ const char* telegramUsername = "@YOUR_TELEGRAM_USERNAME";
 const char* apiKey = "YOUR_CALLMEBOT_API_KEY";
 
 float maxTemp = 60.0;
-float maxVibration = 2.0;
 
 int calibrationReadings = 10;
 int readingCount = 0;
@@ -27,6 +26,25 @@ DHT dht(DHTPIN, DHTTYPE);
 MPU6050 mpu;
 WebServer server(80);
 String dataLog = "";
+
+void reconnectWifi() {
+  // retry wifi if disconnected
+  if (WiFi.status() != WL_CONNECTED) {
+    Serial.println("WiFi lost! Reconnecting...");
+    WiFi.begin(ssid, password);
+    int attempts = 0;
+    while (WiFi.status() != WL_CONNECTED && attempts < 20) {
+      delay(500);
+      Serial.print(".");
+      attempts++;
+    }
+    if (WiFi.status() == WL_CONNECTED) {
+      Serial.println("Reconnected!");
+    } else {
+      Serial.println("Reconnection failed.");
+    }
+  }
+}
 
 void sendAlert(String message) {
   // sending telegram alert
@@ -108,6 +126,7 @@ void setup() {
 }
 
 void loop() {
+  reconnectWifi();
   server.handleClient();
 
   static unsigned long lastRead = 0;
@@ -121,7 +140,6 @@ void loop() {
     mpu.getMotion6(&ax, &ay, &az, &gx, &gy, &gz);
     float vibration = sqrt((float)(ax*ax) + (float)(ay*ay) + (float)(az*az)) / 16384.0;
 
-    // calibration phase - learning normal vibration
     if (!calibrated) {
       totalVibration += vibration;
       readingCount++;
@@ -136,7 +154,6 @@ void loop() {
 
     String status = getStatus(temp, vibration);
 
-    // send alert if something is wrong
     if (status != "NORMAL") {
       sendAlert("MOTOR ALERT: " + status + " | Temp: " + String(temp) + "C | Vibration: " + String(vibration) + "g at " + getTime());
     }
