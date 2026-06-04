@@ -27,5 +27,13 @@ I built this as a low cost predictive maintenance solution that gives early warn
 5. Open Serial Monitor to get IP address
 6. Open that IP in your browser
 
+## Future Improvements
+- Add RPM sensor for more accurate failure prediction
+- Store data on SD card for offline logging
+- Mobile app dashboard
+- Support for multiple motors simultaneously
+- Email alerts in addition to Telegram
+
 ## Built by
 Gauresh Pathak — Electronics and Telecommunication Engineering Student, Mumbai
+
